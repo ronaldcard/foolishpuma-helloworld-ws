@@ -1,6 +1,5 @@
-package com.foolishpuma.helloworld.ws
+package com.foolishpuma.helloworld.ws.ping
 
-import com.foolishpuma.helloworld.ws.ping.PingWSController
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test

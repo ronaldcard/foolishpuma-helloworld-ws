@@ -7,10 +7,10 @@ WORKDIR /usr/local/bin
 COPY ./build/libs/helloworld*.jar /app.jar
 
 CMD java \
-    -Dserver.port=80 \
+    -Dserver.port=8080 \
     -jar \
     /app.jar
 
-EXPOSE 80
+EXPOSE 8080
 
-HEALTHCHECK --start-period-15s --interval=15s CMD["curl", "localhost:80/health"]
+HEALTHCHECK --start-period-15s --interval=15s CMD["curl", "localhost:8080/health"]

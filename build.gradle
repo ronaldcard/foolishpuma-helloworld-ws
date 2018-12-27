@@ -1,3 +1,22 @@
+buildscript {
+	ext {
+		kotlinVersion = '1.3.11'
+		springBootVersion = '2.1.0.RELEASE'
+        gradleDockerPluginVersion = "3.6.2"
+	}
+	repositories {
+		mavenCentral()
+        jcenter()
+        gradlePluginPortal()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+		classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+        classpath("com.bmuschko:gradle-docker-plugin:${gradleDockerPluginVersion}")
+	}
+}
+
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'
 apply plugin: 'java'
@@ -5,25 +24,8 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.bmuschko.docker-remote-api'
 apply plugin: 'com.bmuschko.docker-spring-boot-application'
-
-buildscript {
-	ext {
-		kotlinVersion = '1.2.71'
-		springBootVersion = '2.1.0.RELEASE'
-        gradleDockerVersion = "3.6.2"
-	}
-	repositories {
-		mavenCentral()
-        jcenter()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
-		classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
-        classpath("com.bmuschko:gradle-docker-plugin:${gradleDockerVersion}")
-	}
-}
 
 group = 'com.foolishpuma'
 version = '0.0.1-SNAPSHOT'
@@ -51,10 +53,16 @@ repositories {
 dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-web')
 	implementation('com.fasterxml.jackson.module:jackson-module-kotlin')
-	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	testImplementation('org.springframework.boot:spring-boot-starter-test')
+    implementation('org.springframework.boot:spring-boot-starter-security')
+    implementation('org.springframework.security.oauth:spring-security-oauth2:2.3.4.RELEASE')
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
 }
+
+import com.bmuschko.gradle.docker.tasks.container.*
+
+def dockerContainerBaseName = 'foolishpuma_helloworld-ws'
 
 bootJar {
     baseName = "helloworld-ws"
@@ -65,7 +73,41 @@ bootJar {
 docker {
     springBootApplication {
         baseImage = 'openjdk:8-alpine'
-        ports = [80]
-        tag = 'foolishpuma:helloworld-ws'
     }
+}
+
+task createDockerContainer(type: DockerCreateContainer, dependsOn: 'dockerBuildImage') {
+    targetImageId {dockerBuildImage.imageId}
+    containerName dockerContainerBaseName
+    workingDir '/usr/local/bin'
+    portBindings = [['8080:8080']]
+    attachStdout true
+    attachStderr true
+}
+
+task startDockerContainer(type: DockerStartContainer, dependsOn: 'createDockerContainer') {
+    targetContainerId {createDockerContainer.containerId}
+}
+
+task dockerStopContainer(type: DockerStopContainer) {
+    containerId dockerContainerBaseName
+    timeout 30
+}
+
+task dockerRenameContainer(type: DockerRenameContainer) {
+    containerId dockerContainerBaseName
+	renameTo dockerContainerBaseName + "_" + getDate()
+}
+
+task stopDocker() {
+    def dependentTasks = [dockerStopContainer, dockerRenameContainer]
+    dockerRenameContainer.mustRunAfter(dockerStopContainer)
+
+    dependsOn(dependentTasks)
+}
+
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('MMddyyyy_HHmm_ss')
+    return formattedDate
 }

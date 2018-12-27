@@ -8,6 +8,6 @@ class PingWSController {
 
     @RequestMapping("/ping")
     fun ping(): Boolean {
-        return true;
+        return true
     }
 }
