@@ -24,7 +24,5 @@ class PingWSControllerTest {
     fun `calling ping ws returns true`() {
 
         assertEquals(true, this.pingWSController.ping())
-
-        fail()
     }
 }
