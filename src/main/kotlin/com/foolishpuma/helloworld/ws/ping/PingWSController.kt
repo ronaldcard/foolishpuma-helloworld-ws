@@ -11,8 +11,4 @@ class PingWSController {
         return true
     }
 
-    @RequestMapping("/ping2")
-    fun ping2(): Boolean {
-        return false
-    }
 }

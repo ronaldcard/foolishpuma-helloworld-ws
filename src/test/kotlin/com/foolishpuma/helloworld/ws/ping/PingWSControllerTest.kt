@@ -1,7 +1,6 @@
 package com.foolishpuma.helloworld.ws.ping
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,5 +24,7 @@ class PingWSControllerTest {
     fun `calling ping ws returns true`() {
 
         assertEquals(true, this.pingWSController.ping())
+
+        fail()
     }
 }
