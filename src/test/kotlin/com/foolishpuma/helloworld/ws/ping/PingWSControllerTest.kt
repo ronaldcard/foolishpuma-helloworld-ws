@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
-@SpringBootTest(classes = arrayOf(PingWSController::class))
+@SpringBootTest(classes = [PingWSController::class])
 class PingWSControllerTest {
 
     @Autowired
